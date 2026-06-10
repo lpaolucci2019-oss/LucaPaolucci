@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeanGrid</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+body{font-family:'DM Sans',sans-serif;background:#0a1f17;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 24px}
+.wrap{max-width:480px;width:100%;margin:0 auto}
+
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:rgba(255,255,255,.6);margin-bottom:48px;letter-spacing:.02em}
+
+h1{font-family:'DM Serif Display',serif;font-size:clamp(32px,7vw,48px);line-height:1.1;margin-bottom:16px}
+h1 em{color:#4ECFA0;font-style:italic}
+
+.sub{font-size:clamp(15px,3vw,17px);color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:40px}
+
+.video-wrap{border-radius:16px;overflow:hidden;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;margin-bottom:40px;cursor:pointer;transition:background .2s}
+.video-wrap:hover{background:rgba(255,255,255,.08)}
+.play{width:56px;height:56px;border-radius:50%;background:rgba(78,207,160,.15);border:1.5px solid rgba(78,207,160,.35);display:flex;align-items:center;justify-content:center}
+.play svg{width:20px;height:20px;fill:#4ECFA0;margin-left:3px}
+.video-label{font-size:13px;color:rgba(255,255,255,.35)}
+
+.bullets{display:flex;flex-direction:column;gap:14px;margin-bottom:48px}
+.bullet{display:flex;gap:12px;align-items:flex-start}
+.bullet-dot{width:20px;height:20px;border-radius:50%;background:rgba(78,207,160,.12);border:1px solid rgba(78,207,160,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px}
+.bullet-dot svg{width:9px;height:9px;stroke:#4ECFA0;stroke-width:2.5;fill:none}
+.bullet-text{font-size:15px;color:rgba(255,255,255,.75);line-height:1.55}
+.bullet-text strong{color:#fff;display:block;margin-bottom:2px}
+
+/* FORM */
+.form-wrap{padding-bottom:8px}
+.form-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;display:block}
+.field{margin-bottom:14px}
+.field input{width:100%;padding:14px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;transition:border-color .2s;outline:none}
+.field input::placeholder{color:rgba(255,255,255,.3)}
+.field input:focus{border-color:rgba(78,207,160,.5);background:rgba(255,255,255,.08)}
+.submit{width:100%;padding:16px;background:#1A9E72;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;transition:opacity .15s}
+.submit:hover{opacity:.9}
+.form-note{font-size:12px;color:rgba(255,255,255,.3);text-align:center;margin-top:12px;line-height:1.5}
+
+/* SUCCESS */
+.success{display:none;text-align:center;padding:40px 0}
+.success-icon{width:56px;height:56px;border-radius:50%;background:rgba(78,207,160,.15);border:1px solid rgba(78,207,160,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.success-icon svg{width:22px;height:22px;stroke:#4ECFA0;stroke-width:2;fill:none}
+.success-title{font-family:'DM Serif Display',serif;font-size:24px;color:#fff;margin-bottom:8px}
+.success-sub{font-size:14px;color:rgba(255,255,255,.5);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(78,207,160,.12);border:1px solid rgba(78,207,160,.25);border-radius:20px;padding:8px 16px;margin-bottom:32px">
+    <div style="width:7px;height:7px;border-radius:50%;background:#4ECFA0;flex-shrink:0;animation:pulse 2s infinite"></div>
+    <span style="font-size:13px;color:#4ECFA0;font-weight:500">Now accepting night shift nurses — apply and Luca will personally reach out within 48 hours</span>
+  </div>
+
+  <div class="logo">Luca Paolucci</div>
+
+  <h1>Finally feel good<br>working <em>night shift.</em></h1>
+
+  <p class="sub">A 6-month program built specifically for night shift nurses — to help you lose weight, get your energy back, and keep doing the job you love. Before night shift takes your health for good.</p>
+
+  <div class="form-wrap" id="form-wrap">
+    <span class="form-label">Book a free call with Luca</span>
+    <div class="field"><input type="text" id="f-first" placeholder="First name" required></div>
+    <div class="field"><input type="text" id="f-last" placeholder="Last name" required></div>
+    <div class="field"><input type="email" id="f-email" placeholder="Email address" required></div>
+    <div class="field"><input type="tel" id="f-phone" placeholder="Phone number" required></div>
+    <button class="submit" onclick="submitForm()">Book my free call →</button>
+    <div class="form-note">Luca reviews every application personally and reaches out within 48 hours.</div>
+  </div>
+
+  <div class="success" id="success">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+    </div>
+    <div class="success-title">You're in. 🎉</div>
+    <div class="success-sub">Luca will reach out personally within 48 hours to book your free call.<br><br>Check your email — including your spam folder.</div>
+  </div>
+
+  <div style="height:40px"></div>
+
+  <div class="video-wrap" onclick="alert('Paste your YouTube or Loom link here')">
+    <div class="play">
+      <svg viewBox="0 0 20 20"><polygon points="5,3 19,10 5,17"/></svg>
+    </div>
+    <div class="video-label">Watch — Luca explains the program</div>
+  </div>
+
+  <div class="bullets">
+    <div class="bullet">
+      <div class="bullet-dot"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7.5 8,1.5"/></svg></div>
+      <div class="bullet-text"><strong>Built for 12-hour nights, not 9-to-5s</strong>Your body operates differently on night shift. Your program should too. We adjust everything — calories, meals, workouts — around your actual schedule.</div>
+    </div>
+    <div class="bullet">
+      <div class="bullet-dot"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7.5 8,1.5"/></svg></div>
+      <div class="bullet-text"><strong>You practice evidence-based medicine. Your body deserves the same.</strong>No fads, no bro science, no guessing. Just the most validated fat loss method in existence — the same standard of care you hold yourself to for your patients.</div>
+    </div>
+    <div class="bullet">
+      <div class="bullet-dot"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7.5 8,1.5"/></svg></div>
+      <div class="bullet-text"><strong>Personal coaching from someone who has lived it.</strong>Biweekly calls with Luca — a critical care nurse who worked night shift, faced the same struggles, and built this program because nothing else existed for nurses like us.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function submitForm() {
+  const first = document.getElementById('f-first').value.trim();
+  const last = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+
+  if (!first || !last || !email || !phone) {
+    alert('Please fill out all fields.');
+    return;
+  }
+
+  const button = document.querySelector('.submit');
+  const originalText = button.innerHTML;
+
+  button.disabled = true;
+  button.innerHTML = 'Submitting...';
+
+  try {
+    const response = await fetch('https://formspree.io/f/mkoavona', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        first_name: first,
+        last_name: last,
+        email: email,
+        phone: phone,
+        source: 'LeanGrid Landing Page',
+        submitted_at: new Date().toISOString()
+      })
+    });
+
+    if (response.ok) {
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('success').style.display = 'block';
+    } else {
+      throw new Error('Submission failed');
+    }
+  } catch (error) {
+    alert('There was a problem submitting your application. Please try again.');
+    button.disabled = false;
+    button.innerHTML = originalText;
+  }
+}
+</script>
+</body>
+</html>
