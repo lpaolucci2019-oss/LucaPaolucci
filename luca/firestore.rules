@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── ADMINS COLLECTION ─────────────────────────────────
+    // Only admins can read this. Nobody can write it from the client.
+    // Add admin UIDs manually in the Firebase Console or with the Admin SDK.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // server-side only
+    }
+
+    // ── USER DOCUMENTS ────────────────────────────────────
+    match /users/{uid} {
+      // Users can only read and write their own document
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      // Admins can read any user document
+      allow read: if isAdmin();
+
+      // ── SUBCOLLECTIONS ──────────────────────────────────
+      match /weights/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read: if isAdmin();
+      }
+
+      match /checkins/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read: if isAdmin();
+      }
+
+      match /notes/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read: if isAdmin();
+      }
+    }
+
+    // ── HELPER FUNCTION ───────────────────────────────────
+    function isAdmin() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+  }
+}

@@ -1,1 +1,2090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Luca Paolucci — Night Shift Coaching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --green:       #1A9E72;
+  --green-light: #E1F5EE;
+  --green-dark:  #0A3D2E;
+  --amber:       #D97706;
+  --amber-light: #FEF3C7;
+  --red:         #DC2626;
+  --red-light:   #FEE2E2;
+  --blue-light:  #EFF6FF;
+  --blue:        #2563EB;
+  --bg:          #F5F5F3;
+  --card:        #FFFFFF;
+  --border:      #E5E5E1;
+  --text:        #1A1A18;
+  --text2:       #52524E;
+  --text3:       #A8A8A0;
+  --radius:      16px;
+  --radius-sm:   10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 
+/* ── SCREENS ── */
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;padding-bottom:80px;display:none;-webkit-overflow-scrolling:touch}
+.screen.active{display:block}
+
+/* ── NAV ── */
+nav{height:64px;background:#fff;border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:var(--text3);font-family:'Inter',sans-serif;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;padding:0}
+.nav-btn svg{width:22px;height:22px;stroke-width:1.8}
+.nav-btn.active{color:var(--green)}
+
+/* ── COMMON ── */
+.page-hero{background:var(--green-dark);padding:52px 20px 24px;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(26,158,114,.15);border-radius:50%}
+.hero-eye{font-size:10px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.hero-title{font-family:'Playfair Display',serif;font-size:28px;color:#fff;line-height:1.15;margin-bottom:6px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5}
+
+.section{padding:16px 16px 0}
+.section-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:12px}
+.card-head{padding:12px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:var(--bg)}
+.card-head-title{font-size:12px;font-weight:700;color:var(--text);flex:1}
+.card-body{padding:14px}
+
+.luca-box{background:var(--green-light);border-radius:var(--radius-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.luca-av{width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.luca-txt{font-size:12px;color:var(--green-dark);line-height:1.6}
+
+.pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600}
+.pill-green{background:var(--green-light);color:var(--green)}
+.pill-amber{background:var(--amber-light);color:var(--amber)}
+.pill-red{background:var(--red-light);color:var(--red)}
+.pill-blue{background:var(--blue-light);color:var(--blue)}
+
+.row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row-label{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.row-val{font-size:12px;color:var(--text2)}
+
+/* ── VIDEO PLACEHOLDER ── */
+.vid-wrap{margin:16px 16px 0}
+.vid-thumb{background:var(--green-dark);border-radius:var(--radius);aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;position:relative;overflow:hidden}
+.vid-thumb::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,158,114,.3),transparent)}
+.vid-play{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center}
+.vid-play svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+.vid-label{font-size:13px;font-weight:600;color:#fff}
+.vid-dur{font-size:11px;color:rgba(255,255,255,.5);position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,.4);padding:2px 8px;border-radius:20px}
+.vid-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius)}
+.vid-meta{flex:1}
+.vid-meta-title{font-size:12px;font-weight:600;color:var(--text)}
+.vid-meta-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.vid-badge{font-size:10px;font-weight:600;color:var(--amber);background:var(--amber-light);padding:3px 8px;border-radius:20px;white-space:nowrap}
+
+/* ── TAB 1: HOME ── */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.stat-box-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.stat-box-val{font-size:24px;font-weight:700;color:var(--text);line-height:1}
+.stat-box-unit{font-size:11px;color:var(--text3);margin-top:3px}
+
+.pyramid{display:flex;flex-direction:column;gap:6px}
+.pyr-row{border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.pyr-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.pyr-title{font-size:13px;font-weight:600;color:var(--text)}
+.pyr-sub{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+
+/* ── TAB 2: SCHEDULE ── */
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.cal-month{font-size:17px;font-weight:700;color:var(--text)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--card);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.cal-grid{padding:0 16px}
+.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
+.cal-day-label{text-align:center;font-size:10px;font-weight:600;color:var(--text3);padding:4px 0;text-transform:uppercase}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;border:1.5px solid transparent;background:var(--card);transition:all .15s;user-select:none}
+.cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+.cal-day.night{background:var(--green);border-color:var(--green)}
+.cal-day.today{border-color:var(--green)!important}
+.cal-day-num{font-size:13px;font-weight:600;color:var(--text)}
+.cal-day.night .cal-day-num{color:#fff}
+.cal-day-tag{font-size:8px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:.03em}
+.cal-day.night .cal-day-tag{color:rgba(255,255,255,.8)}
+
+.cal-legend{display:flex;gap:16px;padding:10px 16px;align-items:center}
+.cal-leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.cal-leg-dot{width:10px;height:10px;border-radius:50%}
+
+.today-card{margin:0 16px 12px;background:var(--green-dark);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.today-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(26,158,114,.2);border-radius:50%}
+.today-type{font-size:10px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.today-cals{font-family:'Playfair Display',serif;font-size:36px;color:#fff;line-height:1}
+.today-cals span{font-family:'Inter',sans-serif;font-size:14px;font-weight:400;color:rgba(255,255,255,.6);margin-left:4px}
+.today-macros{display:flex;gap:12px;margin-top:10px}
+.today-macro{background:rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;flex:1;text-align:center}
+.today-macro-val{font-size:16px;font-weight:700;color:#fff}
+.today-macro-label{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
+
+.meal-timeline{display:flex;flex-direction:column;gap:0}
+.meal-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);position:relative}
+.meal-row:last-child{border-bottom:none}
+.meal-time{font-size:11px;font-weight:700;color:var(--green);min-width:62px;padding-top:1px}
+.meal-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:4px}
+.meal-info{flex:1}
+.meal-name{font-size:12px;font-weight:600;color:var(--text)}
+.meal-desc{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+.meal-cal{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;padding-top:1px}
+
+.caff-timeline{display:flex;flex-direction:column;gap:6px}
+.caff-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm)}
+.caff-time{font-size:12px;font-weight:700;min-width:60px}
+.caff-info{flex:1}
+.caff-title{font-size:12px;font-weight:600;color:var(--text)}
+.caff-desc{font-size:11px;color:var(--text3);margin-top:1px}
+
+.supp-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.supp-item:last-child{border-bottom:none}
+.supp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.supp-name{font-size:13px;font-weight:600;color:var(--text)}
+.supp-dose{font-size:11px;color:var(--text2);margin-bottom:4px}
+.supp-desc{font-size:11px;color:var(--text3);line-height:1.5}
+
+.sleep-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.sleep-item:last-child{border-bottom:none}
+.sleep-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.sleep-title{font-size:12px;font-weight:600;color:var(--text)}
+.sleep-desc{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+
+/* ── TAB 3: CHECK-IN ── */
+.weight-form{display:flex;gap:10px;align-items:flex-end;margin-bottom:16px}
+.form-group{flex:1}
+.form-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:16px;font-family:'Inter',sans-serif;color:var(--text);background:var(--card);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--green)}
+.btn-log{padding:11px 18px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap}
+
+.weight-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.ws-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.ws-val{font-size:20px;font-weight:700;color:var(--text)}
+.ws-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.ws-change{font-size:11px;font-weight:600;margin-top:3px}
+.pos{color:var(--green)}
+.neg{color:var(--red)}
+
+.chart-wrap{height:100px;position:relative;margin-bottom:4px}
+.chart-svg{width:100%;height:100%}
+
+.ci-question{padding:12px 0;border-bottom:1px solid var(--border)}
+.ci-question:last-child{border-bottom:none}
+.ci-q-text{font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px}
+.ci-options{display:flex;gap:8px}
+.ci-opt{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;background:var(--card)}
+.ci-opt.selected-green{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.ci-opt.selected-amber{border-color:var(--amber);background:var(--amber-light);color:var(--amber)}
+.ci-opt.selected-red{border-color:var(--red);background:var(--red-light);color:var(--red)}
+
+.ci-result{border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:12px}
+.ci-result-icon{font-size:36px;margin-bottom:8px}
+.ci-result-label{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ci-result-sub{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* ── TAB 4: SCORE ── */
+.score-hero{background:var(--green-dark);margin:16px 16px 0;border-radius:var(--radius);padding:24px;text-align:center;position:relative;overflow:hidden}
+.score-hero::before{content:'';position:absolute;top:-40px;left:-40px;width:160px;height:160px;background:rgba(26,158,114,.15);border-radius:50%}
+.score-hero::after{content:'';position:absolute;bottom:-30px;right:-30px;width:120px;height:120px;background:rgba(26,158,114,.1);border-radius:50%}
+.score-week{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.score-ring-wrap{position:relative;width:140px;height:140px;margin:0 auto 12px}
+.score-ring-wrap svg{width:140px;height:140px;transform:rotate(-90deg)}
+.score-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-num{font-family:'Playfair Display',serif;font-size:42px;color:#fff;line-height:1}
+.score-denom{font-size:13px;color:rgba(255,255,255,.4)}
+.score-grade{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px}
+.score-sub{font-size:12px;color:rgba(255,255,255,.5)}
+
+.metric-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.metric-item:last-child{border-bottom:none}
+.metric-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.metric-icon svg{width:18px;height:18px}
+.metric-info{flex:1}
+.metric-title{font-size:13px;font-weight:600;color:var(--text)}
+.metric-desc{font-size:11px;color:var(--text3);margin-top:1px}
+.metric-score{text-align:right}
+.metric-score-val{font-size:16px;font-weight:700;color:var(--text)}
+.metric-score-max{font-size:11px;color:var(--text3);font-weight:400}
+.metric-bar{width:60px;height:4px;background:var(--border);border-radius:2px;margin-top:4px;margin-left:auto}
+.metric-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+.history-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.history-row:last-child{border-bottom:none}
+.history-week{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.history-bar-wrap{flex:2;height:6px;background:var(--border);border-radius:3px}
+.history-bar-fill{height:100%;border-radius:3px;background:var(--green)}
+.history-score{font-size:13px;font-weight:700;color:var(--text);min-width:36px;text-align:right}
+.history-change{font-size:11px;min-width:32px;text-align:right}
+
+.share-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px}
+
+/* ── VIDEO HIDE BUTTON ── */
+.vid-wrap{position:relative}
+.vid-hide-btn{position:absolute;top:8px;right:8px;z-index:10;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.45);border:none;color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.vid-collapsed{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;margin-bottom:0}
+.vid-collapsed svg{width:14px;height:14px;stroke:var(--text3)}
+
+/* ── AUTH OVERLAY ── */
+#auth-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+#auth-overlay.hidden{display:none}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px}
+.auth-logo{width:48px;height:48px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin:0 auto 16px}
+.auth-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);text-align:center;margin-bottom:4px}
+.auth-sub{font-size:12px;color:var(--text3);text-align:center;margin-bottom:20px}
+.auth-field{margin-bottom:12px}
+.auth-field label{font-size:11px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px}
+.auth-field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-family:'Inter',sans-serif;color:var(--text);background:var(--card);outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--green)}
+.auth-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px}
+.auth-toggle{text-align:center;margin-top:14px;font-size:12px;color:var(--text3)}
+.auth-toggle span{color:var(--green);font-weight:600;cursor:pointer}
+.auth-err{font-size:11px;color:var(--red);background:var(--red-light);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:10px;display:none}
+.auth-saving{font-size:11px;color:var(--text3);text-align:center;margin-top:8px;display:none}
+</style>
+</head>
+<body>
+
+<!-- ── AUTH OVERLAY ── -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">L</div>
+    <div class="auth-title">Night Shift Coaching</div>
+    <div class="auth-sub" id="auth-sub-text">Sign in to your account</div>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="auth-btn" id="auth-submit-btn" onclick="authSubmit()">Sign in</button>
+    <div class="auth-saving" id="auth-saving">Signing in…</div>
+  </div>
+</div>
+
+<div class="screens">
+
+<!-- ════════════════════════════════════════════
+     TAB 1 — HOME
+════════════════════════════════════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="page-hero">
+    <div class="hero-eye">Luca Paolucci · Night Shift Coaching</div>
+    <div class="hero-title">Welcome to the program.</div>
+    <div class="hero-sub">6 months. Built for nights. Everything you need is right here.</div>
+  </div>
+
+  <!-- Welcome video -->
+  <div class="vid-wrap" style="margin-top:16px">
+    <div class="vid-thumb" onclick="alert('Add your welcome video link here')">
+      <div class="vid-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+      <div class="vid-label">Welcome to the program</div>
+      <div class="vid-dur">~3 min</div>
+    </div>
+    <div class="vid-info">
+      <div class="luca-av" style="width:32px;height:32px;font-size:13px">L</div>
+      <div class="vid-meta">
+        <div class="vid-meta-title">Watch this first</div>
+        <div class="vid-meta-sub">Who I am, what we're doing, and how it works</div>
+      </div>
+      <span class="vid-badge">Coming soon</span>
+    </div>
+  </div>
+
+
+
+  <!-- Expectations -->
+  <div class="section">
+    <div class="section-label">What to expect</div>
+    <div class="card">
+      <div class="row">
+        <div class="row-label">Program length</div>
+        <div class="row-val">26 weeks</div>
+      </div>
+      <div class="row">
+        <div class="row-label">Expected fat loss</div>
+        <div class="row-val">0.5–1 lb/week</div>
+      </div>
+      <div class="row">
+        <div class="row-label">Workouts per week</div>
+        <div class="row-val">3–5 days</div>
+      </div>
+      <div class="row">
+        <div class="row-label">Daily tracking</div>
+        <div class="row-val">MyFitnessPal</div>
+      </div>
+      <div class="row">
+        <div class="row-label">Access to Luca</div>
+        <div class="row-val">24/7</div>
+      </div>
+      <div class="row">
+        <div class="row-label">Video calls</div>
+        <div class="row-val">Included</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hierarchy -->
+  <div class="section">
+    <div class="section-label">The hierarchy — what actually matters, in order</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--green-dark);padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">1</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">Consistency is king</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">Showing up every day — even imperfectly — beats being perfect some days and gone the rest. Nothing else on this list matters if you quit.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">I don't care if you hit your macros perfectly. I care that you're still here in week 12.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:#0D5237;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">2</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">Discipline over motivation</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">Motivation is an emotion — it comes and goes. Discipline is a system. You won't always feel like tracking at 4am after a 12-hour shift. Do it anyway.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">The nights you least want to do it are the nights that define whether this works.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--green);padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">3</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">Calories in, calories out</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">This is the only rule of fat loss. Not keto, not carnivore, not intermittent fasting. Science doesn't care about your feelings — a calorie deficit moves the scale.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">I've seen this in critical care medicine. The science is settled. Trust it.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--green);padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">4</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">Protein first</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">Hit your protein target every single day before you worry about anything else. Protein keeps you full, preserves muscle, and makes everything easier on nights.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">If you hit nothing else, hit your protein. The rest sorts itself out.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--green-light);padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">5</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Sleep is non-negotiable</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">Poor sleep spikes cortisol, tanks your metabolism, and makes you crave junk. On nights especially, protecting your sleep is protecting your results.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">You can't out-diet bad sleep. This is the most underrated part of the program.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--green-light);padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">6</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Your schedule is your strategy</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">Stop following advice built for 9-to-5 people. Your shift IS your framework. We build everything around it — when you eat, train, and recover.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">This is why I built this program. Nobody else is doing this for night shift nurses.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--bg);padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--text3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">7</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Progress over perfection</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">A bad day doesn't erase a good week. A bad week doesn't erase a good month. Stop starting over — just keep going from where you are.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">The people who succeed aren't perfect. They're just the ones who didn't quit.</div>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div style="background:var(--bg);padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--text3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">8</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Trust the process</div>
+        </div>
+        <div style="padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.6">Six months feels like a long time until you're standing there down 30 pounds. The scale won't move every week. Stay the course.</div>
+        <div style="margin:0 14px 12px;background:var(--green-light);border-radius:8px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">L</div>
+          <div style="font-size:11px;color:var(--green-dark);font-style:italic;line-height:1.5">Everyone who stuck with this looked back and said the same thing — I wish I started sooner.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section" style="padding-bottom:8px">
+    <div class="luca-box">
+      <div class="luca-av">L</div>
+      <div class="luca-txt">I don't care if you hit your macros perfectly every day. I care that you're still here in week 12. Consistency is the whole game. Everything else is details.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 2 — SCHEDULE
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-schedule">
+  <div class="page-hero">
+    <div class="hero-eye">Your schedule</div>
+    <div class="hero-title">Tap to mark your night shifts.</div>
+    <div class="hero-sub">Everything below auto-updates based on what you log.</div>
+  </div>
+
+  <!-- Video -->
+  <div class="vid-wrap" style="margin-top:16px">
+    <div class="vid-thumb" style="cursor:default;padding:0" id="vt-schedule">
+      <button class="vid-hide-btn" onclick="toggleVid('schedule')" title="Hide video">−</button>
+      <iframe
+        src="https://player.vimeo.com/video/1202766686?badge=0&autopause=0&player_id=0&app_id=58479"
+        style="position:absolute;inset:0;width:100%;height:100%;border:0"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+        allowfullscreen
+        title="Schedule walkthrough">
+      </iframe>
+    </div>
+    <div class="vid-collapsed" id="vc-schedule" style="display:none" onclick="toggleVid('schedule')">
+      <span>Schedule walkthrough</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+    </div>
+    <div class="vid-info">
+      <div class="luca-av" style="width:32px;height:32px;font-size:13px">L</div>
+      <div class="vid-meta">
+        <div class="vid-meta-title">Schedule walkthrough</div>
+        <div class="vid-meta-sub">How your shifts auto-adjust your calories and meal timing</div>
+      </div>
+      <span class="vid-badge">Coming soon</span>
+    </div>
+  </div>
+
+  <!-- OG NurseGrid style calendar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px">
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text)" id="og-month-title">June 2026</div>
+    <div style="display:flex;gap:6px">
+      <button onclick="ogChangeMonth(-1)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&#8249;</button>
+      <button onclick="ogChangeMonth(1)"  style="width:32px;height:32px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&#8250;</button>
+    </div>
+  </div>
+
+  <div style="padding:0 12px 8px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px" id="og-day-labels"></div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px" id="og-day-cells"></div>
+  </div>
+
+  <div style="display:flex;gap:14px;padding:8px 16px 12px;align-items:center">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:var(--green)"></div>Night shift</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:var(--bg);border:1px solid var(--border)"></div>Day off</div>
+  </div>
+
+  <!-- Month summary -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin:0 16px 12px;overflow:hidden">
+    <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--bg)">This month</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr)">
+      <div style="padding:14px 10px;text-align:center;border-right:1px solid var(--border)">
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--text)" id="og-cs-shifts">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Night shifts</div>
+      </div>
+      <div style="padding:14px 10px;text-align:center;border-right:1px solid var(--border)">
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--text)" id="og-cs-off">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Days off</div>
+      </div>
+      <div style="padding:14px 10px;text-align:center">
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--text)" id="og-cs-avg">—</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Avg cal/day</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week strip -->
+  <div style="padding:0 16px;margin-bottom:6px;font-size:12px;font-weight:500;color:var(--text2)">This week</div>
+  <div style="display:flex;gap:4px;padding:0 16px 12px;overflow-x:auto" id="og-week-strip"></div>
+
+  <!-- Today's nutrition -->
+  <div class="section">
+    <div class="section-label">Today's nutrition</div>
+    <div class="today-card">
+      <div class="today-type" id="today-type">Night shift day</div>
+      <div class="today-cals" id="today-cals">1,890 <span>cal</span></div>
+      <div class="today-macros">
+        <div class="today-macro"><div class="today-macro-val" id="tm-protein">185g</div><div class="today-macro-label">Protein</div></div>
+        <div class="today-macro"><div class="today-macro-val" id="tm-carbs">155g</div><div class="today-macro-label">Carbs</div></div>
+        <div class="today-macro"><div class="today-macro-val" id="tm-fat">59g</div><div class="today-macro-label">Fat</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meal timing -->
+  <div class="section">
+    <div class="section-label">Meal timing</div>
+    <div class="card">
+      <div class="card-body" id="meal-timing-body"></div>
+    </div>
+  </div>
+
+  <!-- Caffeine timing -->
+  <div class="section">
+    <div class="section-label">Caffeine guide</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.6">Caffeine has a 5–6 hour half life. Timing matters more than amount.</div>
+        <div class="caff-timeline" id="caff-timeline"></div>
+        <div style="margin-top:12px;padding:10px;background:var(--bg);border-radius:8px">
+          <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px">General rules</div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.6">200–400mg max per day · Wait 90 min after waking before first caffeine · Match every caffeinated drink with a glass of water · Limit energy drinks — high sugar and additives. Coffee, green tea, or low sugar options like Celsius are cleaner choices</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sleep protocol -->
+  <div class="section">
+    <div class="section-label">Sleep protocol</div>
+    <div class="card">
+      <div class="card-head"><div class="card-head-title">On your days off</div></div>
+      <div class="card-body">
+        <div class="sleep-item"><div class="sleep-icon">☀️</div><div><div class="sleep-title">Get sunlight within 30 min of waking</div><div class="sleep-desc">Morning light anchors your rhythm. Even 10 minutes outside makes a measurable difference.</div></div></div>
+        <div class="sleep-item"><div class="sleep-icon">⏰</div><div><div class="sleep-title">Wake at the same time every day off</div><div class="sleep-desc">Consistent wake time is the single most important factor for sleep quality on nights.</div></div></div>
+        <div class="sleep-item"><div class="sleep-icon">💊</div><div><div class="sleep-title">Magnesium glycinate before sleep</div><div class="sleep-desc">200–400mg. Promotes deeper sleep, reduces cortisol.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplement guide -->
+  <div class="section" style="padding-bottom:4px">
+    <div class="section-label">Supplement guide</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="supp-item">
+          <div class="supp-top"><div class="supp-name">Vitamin D3 + K2</div><span class="pill pill-green">Most important</span></div>
+          <div class="supp-dose">2,000–4,000 IU daily with food</div>
+          <div class="supp-desc">Night shift nurses are chronically Vitamin D deficient — you sleep during peak sunlight hours. Linked to weight gain, fatigue, and immune dysfunction.</div>
+        </div>
+        <div class="supp-item">
+          <div class="supp-top"><div class="supp-name">Magnesium Glycinate</div><span class="pill pill-blue">Sleep quality</span></div>
+          <div class="supp-dose">200–400mg before sleep</div>
+          <div class="supp-desc">Promotes deeper sleep and reduces cortisol. Glycinate form is most absorbable. One of the most impactful things for night shift recovery.</div>
+        </div>
+        <div style="margin-top:8px;padding:10px 12px;background:var(--red-light);border-radius:var(--radius-sm)">
+          <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:3px">Don't waste money on</div>
+          <div style="font-size:11px;color:var(--text2)">Fat burners · detox teas · appetite suppressants · BCAAs (if you hit protein) · most pre-workouts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:16px"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 3 — CHECK-IN + WEIGHT
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-checkin">
+  <div class="page-hero">
+    <div class="hero-eye">Daily check-in</div>
+    <div class="hero-title">30 seconds. Every morning.</div>
+    <div class="hero-sub">Log your weight and answer honestly. This data tells Luca everything.</div>
+  </div>
+
+  <!-- Video -->
+  <div class="vid-wrap" style="margin-top:16px">
+    <div class="vid-thumb" style="cursor:default;padding:0" id="vt-checkin">
+      <button class="vid-hide-btn" onclick="toggleVid('checkin')" title="Hide video">−</button>
+      <iframe
+        src="https://player.vimeo.com/video/1202766051?badge=0&autopause=0&player_id=0&app_id=58479"
+        style="position:absolute;inset:0;width:100%;height:100%;border:0"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+        allowfullscreen
+        title="Check-in walkthrough">
+      </iframe>
+    </div>
+    <div class="vid-collapsed" id="vc-checkin" style="display:none" onclick="toggleVid('checkin')">
+      <span>Check-in walkthrough</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+    </div>
+    <div class="vid-info">
+      <div class="luca-av" style="width:32px;height:32px;font-size:13px">L</div>
+      <div class="vid-meta">
+        <div class="vid-meta-title">Check-in walkthrough</div>
+        <div class="vid-meta-sub">What each question means and why it matters</div>
+      </div>
+      <span class="vid-badge">Coming soon</span>
+    </div>
+  </div>
+
+  <!-- Photo upload option -->
+  <div class="section" style="margin-top:16px">
+    <div class="section-label">Today's photo (optional)</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6">Progress photos are one of the most powerful tools in this program. The scale doesn't always show what's happening — photos do. Take one every week on the same day.</div>
+        <div id="checkin-photo-preview" style="display:none;margin-bottom:12px">
+          <img id="checkin-photo-img" src="" style="width:100%;border-radius:var(--radius-sm);max-height:200px;object-fit:cover">
+          <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">Photo logged for today</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('checkin-photo-input').click()" style="flex:1;padding:10px;border:1.5px dashed var(--green);border-radius:var(--radius-sm);background:var(--green-light);color:var(--green);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            Upload photo
+          </button>
+          <button onclick="document.getElementById('checkin-camera-input').click()" style="flex:1;padding:10px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text2);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Take photo
+          </button>
+        </div>
+        <input type="file" id="checkin-photo-input" accept="image/*" style="display:none" onchange="handleCheckinPhoto(this)">
+        <input type="file" id="checkin-camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleCheckinPhoto(this)">
+      </div>
+    </div>
+  </div>
+  <div class="section" style="margin-top:16px">
+    <div class="section-label">Log today's weight</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="weight-form">
+          <div class="form-group">
+            <label class="form-label">Weight (lbs)</label>
+            <input class="form-input" type="number" placeholder="e.g. 184.5" id="weight-input" step="0.1">
+          </div>
+          <div class="form-group" style="max-width:130px">
+            <label class="form-label">Date</label>
+            <input class="form-input" type="date" id="date-input">
+          </div>
+          <button class="btn-log" onclick="logWeight()">Log</button>
+        </div>
+        <div class="weight-stats">
+          <div class="ws-box">
+            <div class="ws-val" id="ws-current">184.0</div>
+            <div class="ws-label">Current</div>
+            <div class="ws-change pos" id="ws-change">↓ 11.0 lbs</div>
+          </div>
+          <div class="ws-box">
+            <div class="ws-val" id="ws-start">195.0</div>
+            <div class="ws-label">Starting</div>
+          </div>
+          <div class="ws-box">
+            <div class="ws-val" id="ws-entries">9</div>
+            <div class="ws-label">Weigh-ins</div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px">Progress over time</div>
+        <div class="chart-wrap">
+          <svg class="chart-svg" id="weight-chart" viewBox="0 0 300 100" preserveAspectRatio="none">
+            <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A9E72" stop-opacity=".3"/><stop offset="100%" stop-color="#1A9E72" stop-opacity="0"/></linearGradient></defs>
+            <path id="chart-area" fill="url(#wg)"/>
+            <path id="chart-line" fill="none" stroke="#1A9E72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="font-size:10px;color:var(--text3);text-align:center">Weigh in once a week — same morning, after bathroom, before food. Never after a night shift.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress photos side by side -->
+  <div class="section">
+    <div class="section-label">Progress photos</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6">The scale lies. Photos don't. Take one every week on the same day in the same lighting. The side by side will show you things the scale never will.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Starting photo</div>
+            <div id="start-photo-wrap" onclick="document.getElementById('start-photo-input').click()" style="aspect-ratio:3/4;border-radius:var(--radius-sm);border:1.5px dashed var(--border);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;overflow:hidden">
+              <img id="start-photo-img" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+              <div id="start-photo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                <div style="font-size:10px;color:var(--text3);text-align:center">Tap to add</div>
+              </div>
+            </div>
+            <input type="file" id="start-photo-input" accept="image/*" style="display:none" onchange="handleProgressPhoto(this,'start')">
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Current photo</div>
+            <div id="current-photo-wrap" onclick="document.getElementById('current-photo-input').click()" style="aspect-ratio:3/4;border-radius:var(--radius-sm);border:1.5px dashed var(--green);background:var(--green-light);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;overflow:hidden">
+              <img id="current-photo-img" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+              <div id="current-photo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                <div style="font-size:10px;color:var(--green);text-align:center">Tap to add</div>
+              </div>
+            </div>
+            <input type="file" id="current-photo-input" accept="image/*" style="display:none" onchange="handleProgressPhoto(this,'current')">
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:8px 12px;background:var(--bg);border-radius:var(--radius-sm);font-size:11px;color:var(--text3);text-align:center">Same time, same lighting, same pose. Every week.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">How are you doing today?</div>
+    <div class="card">
+      <div class="card-body" id="ci-questions">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="ci-result-wrap" style="display:none;padding:0 16px 16px">
+    <div class="ci-result" id="ci-result-box">
+      <div class="ci-result-icon" id="ci-icon"></div>
+      <div class="ci-result-label" id="ci-label"></div>
+      <div class="ci-result-sub" id="ci-sub"></div>
+    </div>
+    <div class="luca-box" id="ci-luca">
+      <div class="luca-av">L</div>
+      <div class="luca-txt" id="ci-luca-txt"></div>
+    </div>
+    <button class="btn-log" style="width:100%;padding:13px" onclick="resetCheckin()">Start over</button>
+  </div>
+
+  <div style="height:16px"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 4 — PERSONAL
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-score">
+  <div class="page-hero">
+    <div class="hero-eye">Your profile</div>
+    <div class="hero-title">Tell us about you.</div>
+    <div class="hero-sub">Fill this in once — your macros and meal timing calculate automatically.</div>
+  </div>
+
+  <!-- Video -->
+  <div class="vid-wrap" style="margin-top:16px">
+    <div class="vid-thumb" style="cursor:default;padding:0" id="vt-profile">
+      <button class="vid-hide-btn" onclick="toggleVid('profile')" title="Hide video">−</button>
+      <iframe
+        src="https://player.vimeo.com/video/1202764541?badge=0&autopause=0&player_id=0&app_id=58479"
+        style="position:absolute;inset:0;width:100%;height:100%;border:0"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+        allowfullscreen
+        title="Macro calculator walkthrough">
+      </iframe>
+    </div>
+    <div class="vid-collapsed" id="vc-profile" style="display:none" onclick="toggleVid('profile')">
+      <span>Macro calculator walkthrough</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+    </div>
+    <div class="vid-info">
+      <div class="luca-av" style="width:32px;height:32px;font-size:13px">L</div>
+      <div class="vid-meta">
+        <div class="vid-meta-title">Macro calculator walkthrough</div>
+        <div class="vid-meta-sub">What each field means and the science behind your numbers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit profile button (shown after profile is saved) -->
+  <div id="profile-edit-btn" style="display:none;padding:0 16px;margin-top:12px">
+    <button onclick="showProfileForm()" style="width:100%;padding:11px;border:1.5px solid var(--green);border-radius:var(--radius-sm);background:var(--green-light);color:var(--green);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer">Edit profile &amp; recalculate</button>
+  </div>
+
+  <div id="profile-form-wrap">
+  <!-- Profile photo -->
+  <div class="section" style="margin-top:16px">
+    <div class="section-label">Profile photo</div>
+    <div class="card">
+      <div class="card-body" style="display:flex;align-items:center;gap:16px">
+        <div id="profile-pic-wrap" style="width:72px;height:72px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;border:2px solid var(--green)" onclick="document.getElementById('photo-input').click()">
+          <div id="profile-initials" style="font-size:24px;font-weight:700;color:#fff">?</div>
+          <img id="profile-img" src="" style="display:none;width:100%;height:100%;object-fit:cover">
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Tap to upload a photo</div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5">Your photo shows up in the app throughout your 6 month journey.</div>
+          <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+          <button onclick="document.getElementById('photo-input').click()" style="margin-top:8px;padding:6px 14px;border:1px solid var(--green);border-radius:20px;background:var(--green-light);color:var(--green);font-size:11px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer">Choose photo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal info -->
+  <div class="section">
+    <div class="section-label">Personal info</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-label">First name</label>
+            <input class="form-input" type="text" placeholder="Sarah" id="p-name" oninput="updateInitials()">
+          </div>
+          <div>
+            <label class="form-label">Age</label>
+            <input class="form-input" type="number" placeholder="28" id="p-age">
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label class="form-label">Sex</label>
+          <div style="display:flex;gap:8px">
+            <div class="ci-opt" id="sex-m" onclick="selectSex('male')" style="flex:1">Male</div>
+            <div class="ci-opt" id="sex-f" onclick="selectSex('female')" style="flex:1">Female</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label class="form-label">Height (inches)</label>
+            <input class="form-input" type="number" placeholder="e.g. 65" id="p-height">
+          </div>
+          <div>
+            <label class="form-label">Weight (lbs)</label>
+            <input class="form-input" type="number" placeholder="e.g. 185" id="p-weight">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity level -->
+  <div class="section">
+    <div class="section-label">Activity level</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="ci-opt" id="act-sed" onclick="selectActivity('sed',1.2)" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Sedentary</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Little to no exercise outside of work</div>
+          </div>
+          <div class="ci-opt" id="act-light" onclick="selectActivity('light',1.375)" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Lightly active</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">1–2 workouts per week</div>
+          </div>
+          <div class="ci-opt" id="act-mod" onclick="selectActivity('mod',1.55)" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Moderately active</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">3–4 workouts per week</div>
+          </div>
+          <div class="ci-opt" id="act-very" onclick="selectActivity('very',1.725)" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Very active</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">5+ workouts per week</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weight loss pace -->
+  <div class="section">
+    <div class="section-label">Weight loss pace</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Slow and steady is the goal here. Night shift already puts your body under stress — we don't need to add a massive deficit on top of that. Pick a pace that feels sustainable.</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="ci-opt" id="pace-slow" onclick="selectPace('slow',-200)" style="text-align:left;padding:10px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-weight:600;font-size:12px">Slow — recommended to start</div>
+              <span class="pill pill-green">Best for nights</span>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">−200 cal deficit · ~0.4 lbs per week · Easy to maintain, low stress on your body</div>
+          </div>
+          <div class="ci-opt" id="pace-mod" onclick="selectPace('mod',-350)" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Moderate</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">−350 cal deficit · ~0.7 lbs per week · Good balance of progress and sustainability</div>
+          </div>
+          <div class="ci-opt" id="pace-fast" onclick="selectPace('fast',-500)" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Aggressive</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">−500 cal deficit · ~1 lb per week · Only recommended once you are fully dialed in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Macro preference -->
+  <div class="section">
+    <div class="section-label">Macro preference</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">Protein and total calories are what actually drive fat loss — those are locked in. The split between carbs and fat is personal preference. Pick whatever feels more sustainable for you.</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="ci-opt" id="macro-balanced" onclick="selectMacroPref('balanced')" style="text-align:left;padding:10px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-weight:600;font-size:12px">Balanced</div>
+              <span class="pill pill-green">Recommended</span>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Even split between carbs and fat. Works well for most people and easiest to maintain on nights.</div>
+          </div>
+          <div class="ci-opt" id="macro-highcarb" onclick="selectMacroPref('highcarb')" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Higher carbs</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">More carbs, less fat. Good if you prefer rice, pasta, fruit, and higher volume meals. Better for energy during long shifts.</div>
+          </div>
+          <div class="ci-opt" id="macro-highfat" onclick="selectMacroPref('highfat')" style="text-align:left;padding:10px 14px">
+            <div style="font-weight:600;font-size:12px">Higher fat</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">More fat, less carbs. Good if you prefer eggs, avocado, nuts, and richer foods. Keeps you fuller longer between meals.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculate button -->
+  <div class="section">
+    <button class="btn-log" style="width:100%;padding:14px;font-size:14px" onclick="calculateMacros()">Calculate my macros</button>
+  </div>
+
+  </div><!-- end profile-form-wrap -->
+
+  <!-- Results -->
+  <div id="macro-results" style="display:none">
+    <div class="section">
+      <div class="section-label">Your results</div>
+      <div class="today-card">
+        <div class="today-type" id="res-name">Hey!</div>
+        <div class="today-cals" id="res-shift-cals">— <span id="res-day-label">cal today</span></div>
+        <div class="today-macros">
+          <div class="today-macro"><div class="today-macro-val" id="res-protein">—</div><div class="today-macro-label">Protein</div></div>
+          <div class="today-macro"><div class="today-macro-val" id="res-carbs">—</div><div class="today-macro-label">Carbs</div></div>
+          <div class="today-macro"><div class="today-macro-val" id="res-fat">—</div><div class="today-macro-label">Fat</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Rest day targets</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="row" style="padding:8px 0"><div class="row-label">Calories</div><div class="row-val" id="res-rest-cals">—</div></div>
+          <div class="row" style="padding:8px 0"><div class="row-label">Protein</div><div class="row-val" id="res-rest-protein">—</div></div>
+          <div class="row" style="padding:8px 0"><div class="row-label">Carbs</div><div class="row-val" id="res-rest-carbs">—</div></div>
+          <div class="row" style="padding:8px 0;border-bottom:none"><div class="row-label">Fat</div><div class="row-val" id="res-rest-fat">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">How we calculated this</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="row" style="padding:8px 0"><div class="row-label">BMR</div><div class="row-val" id="res-bmr">—</div></div>
+          <div class="row" style="padding:8px 0"><div class="row-label">TDEE</div><div class="row-val" id="res-tdee">—</div></div>
+          <div class="row" style="padding:8px 0"><div class="row-label">Deficit</div><div class="row-val" id="res-deficit">—</div></div>
+          <div class="row" style="padding:8px 0"><div class="row-label">Macro split</div><div class="row-val" id="res-macro-pref">—</div></div>
+          <div class="row" style="padding:8px 0;border-bottom:none"><div class="row-label">Night shift bump</div><div class="row-val">+150 cal on shift days</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" style="padding-bottom:16px">
+      <div class="luca-box">
+        <div class="luca-av">L</div>
+        <div class="luca-txt" id="res-luca-note">These are your numbers — own them. Hit your protein first every single day before you worry about anything else.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign out -->
+  <div class="section" style="padding-bottom:20px">
+    <button onclick="firebase.auth().signOut()" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text3);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer">Sign out</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 5 — NOTES
+════════════════════════════════════════════ -->
+<div class="screen" id="screen-notes">
+  <div class="page-hero">
+    <div class="hero-eye">Notes</div>
+    <div class="hero-title">Write anything.</div>
+    <div class="hero-sub">Luca has access to these and will reach out based on what you share. Your notes stay here forever.</div>
+  </div>
+
+  <!-- Compose -->
+  <div class="section" style="margin-top:16px">
+    <div class="section-label">New note</div>
+    <div class="card">
+      <div class="card-body">
+        <textarea id="new-note-input" placeholder="How you're feeling, what's been hard, wins this week, questions for Luca, anything on your mind..." style="width:100%;min-height:110px;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--card);outline:none;resize:none;line-height:1.6" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <div style="font-size:11px;color:var(--text3)" id="new-note-count">0 characters</div>
+          <button onclick="submitNote()" style="padding:9px 20px;background:var(--green);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer">Save note</button>
+        </div>
+        <div id="note-sent-confirm" style="display:none;margin-top:8px;padding:8px 12px;background:var(--green-light);border-radius:var(--radius-sm);font-size:11px;color:var(--green);font-weight:600;text-align:center">✓ Note saved — Luca has access to this</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thread -->
+  <div class="section">
+    <div class="section-label">Your notes</div>
+    <div id="notes-thread" style="display:none;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+    <div id="notes-empty" style="text-align:center;padding:32px 16px;color:var(--text3);margin-bottom:16px">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom:10px;opacity:.4"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">No notes yet</div>
+      <div style="font-size:12px">Write your first note above. Luca reads every single one.</div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- end screens -->
+
+<!-- ── BOTTOM NAV ── -->
+<nav>
+  <button class="nav-btn active" onclick="showTab('home',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Home
+  </button>
+  <button class="nav-btn" onclick="showTab('score',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </button>
+  <button class="nav-btn" onclick="showTab('schedule',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Schedule
+  </button>
+  <button class="nav-btn" onclick="showTab('checkin',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    Check-in
+  </button>
+  <button class="nav-btn" onclick="showTab('notes',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Notes
+  </button>
+</nav>
+
+<script>
+// ── NAV ──────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── OG CALENDAR ──────────────────────────────────────────
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+let SHIFT_CAL = 0, OFF_CAL = 0;
+const SHIFT_P = 185, REST_P = 185;
+const SHIFT_C = 155, REST_C = 130;
+const SHIFT_F = 59, REST_F = 52;
+let profileCalculated = false;
+let ogCurrent = new Date(2026, 5, 1);
+let ogShifts = {};
+
+function ogKey(y, m, d) { return `${y}-${m}-${d}`; }
+
+function buildOGCalendar() {
+  const y = ogCurrent.getFullYear(), m = ogCurrent.getMonth();
+  const today = new Date();
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  document.getElementById('og-month-title').textContent = `${MONTHS[m]} ${y}`;
+  document.getElementById('og-day-labels').innerHTML = DAYS_SHORT.map(d => `<div style="text-align:center;font-size:10px;font-weight:500;color:var(--text3);padding:2px 0">${d}</div>`).join('');
+
+  // Pre-calculate balanced cals for every week in this month
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += `<div style="min-height:50px"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const k = ogKey(y, m, d);
+    const isNight = !!ogShifts[k];
+    const isToday = today.getFullYear() === y && today.getMonth() === m && today.getDate() === d;
+
+    // Get balanced cal for this day's week
+    const thisDate = new Date(y, m, d);
+    const weekStart = new Date(thisDate);
+    weekStart.setDate(thisDate.getDate() - thisDate.getDay());
+    const { balancedRestCal } = getWeeklyBalancedCals(weekStart);
+    const dayCal = isNight ? SHIFT_CAL : balancedRestCal;
+
+    const bg = isNight ? 'var(--green)' : 'var(--bg)';
+    const border = isToday ? '1.5px solid var(--green)' : (isNight ? '1px solid var(--green)' : '1px solid var(--border)');
+    const numCol = isNight ? '#fff' : 'var(--text)';
+    const tagBg = isNight ? 'rgba(255,255,255,.2)' : 'var(--border)';
+    const tagCol = isNight ? '#fff' : 'var(--text3)';
+    const calCol = isNight ? 'rgba(255,255,255,.75)' : 'var(--text3)';
+    html += `<div onclick="ogToggleDay('${k}',${y},${m},${d})" style="border-radius:10px;cursor:pointer;transition:all .15s;user-select:none;border:${border};min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:${bg}">
+      <div style="font-size:12px;font-weight:500;color:${numCol}">${d}</div>
+      <div style="font-size:8px;font-weight:600;border-radius:4px;padding:1px 4px;background:${tagBg};color:${tagCol}">${isNight ? 'NIGHT' : 'OFF'}</div>
+      <div style="font-size:8px;color:${calCol}">${dayCal.toLocaleString()}</div>
+    </div>`;
+  }
+  document.getElementById('og-day-cells').innerHTML = html;
+  ogUpdateSummary(y, m, daysInMonth);
+  ogBuildWeekStrip();
+  ogUpdateNutrition();
+}
+
+function ogToggleDay(k, y, m, d) {
+  // Toggle: if currently a night shift, remove it; otherwise mark it as one.
+  if (ogShifts[k]) {
+    delete ogShifts[k];
+  } else {
+    ogShifts[k] = true;
+  }
+  buildOGCalendar();
+}
+
+function ogUpdateSummary(y, m, daysInMonth) {
+  let nights = 0;
+  for (let d = 1; d <= daysInMonth; d++) { if (ogShifts[ogKey(y, m, d)]) nights++; }
+  const off = daysInMonth - nights;
+  const avg = Math.round((nights * SHIFT_CAL + off * OFF_CAL) / daysInMonth);
+  document.getElementById('og-cs-shifts').textContent = nights;
+  document.getElementById('og-cs-off').textContent = off;
+  document.getElementById('og-cs-avg').textContent = avg.toLocaleString();
+}
+
+function getWeeklyBalancedCals(weekStart) {
+  // Count shifts in this week
+  let weekNights = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const k = ogKey(d.getFullYear(), d.getMonth(), d.getDate());
+    if (ogShifts[k]) weekNights++;
+  }
+  const weekOff = 7 - weekNights;
+
+  // Weekly calorie target = 7 days × base calories
+  const weeklyTarget = 7 * OFF_CAL;
+
+  // Shift days are fixed at SHIFT_CAL
+  // Rest days = (weeklyTarget - weekNights * SHIFT_CAL) / weekOff
+  let balancedRestCal = weekOff > 0
+    ? Math.round((weeklyTarget - weekNights * SHIFT_CAL) / weekOff)
+    : OFF_CAL;
+
+  // Don't let rest day calories drop below a safe floor (1200 for women, 1400 for men — use 1300 as safe default)
+  balancedRestCal = Math.max(balancedRestCal, 1300);
+
+  return { weekNights, weekOff, balancedRestCal };
+}
+
+function ogBuildWeekStrip() {
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay());
+  const { balancedRestCal } = getWeeklyBalancedCals(start);
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const k = ogKey(d.getFullYear(), d.getMonth(), d.getDate());
+    const isNight = !!ogShifts[k];
+    const dayCal = isNight ? SHIFT_CAL : balancedRestCal;
+    const bg = isNight ? 'var(--green)' : 'var(--bg)';
+    const border = isNight ? 'var(--green)' : 'var(--border)';
+    const col = isNight ? '#fff' : 'var(--text)';
+    const sub = isNight ? 'rgba(255,255,255,.7)' : 'var(--text3)';
+    html += `<div style="flex-shrink:0;width:44px;border-radius:10px;padding:8px 4px;text-align:center;border:1px solid ${border};background:${bg}">
+      <div style="font-size:9px;font-weight:500;color:${sub}">${DAYS_SHORT[d.getDay()]}</div>
+      <div style="font-size:13px;font-weight:500;color:${col};margin:2px 0">${d.getDate()}</div>
+      <div style="font-size:9px;color:${sub}">${dayCal.toLocaleString()}</div>
+    </div>`;
+  }
+  document.getElementById('og-week-strip').innerHTML = html;
+}
+
+function ogUpdateNutrition() {
+  const today = new Date();
+  const k = ogKey(today.getFullYear(), today.getMonth(), today.getDate());
+  const isNight = !!ogShifts[k];
+
+  if (!profileCalculated) {
+    document.getElementById('today-type').textContent = 'Fill out your Profile tab first';
+    document.getElementById('today-cals').innerHTML = `— <span>cal</span>`;
+    document.getElementById('tm-protein').textContent = '—';
+    document.getElementById('tm-carbs').textContent = '—';
+    document.getElementById('tm-fat').textContent = '—';
+    buildMealTiming(isNight);
+    buildCaffeine(isNight);
+    return;
+  }
+
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const { balancedRestCal, weekNights, weekOff } = getWeeklyBalancedCals(weekStart);
+
+  const todayCal = isNight ? SHIFT_CAL : balancedRestCal;
+  const weeklyAvg = Math.round((weekNights * SHIFT_CAL + weekOff * balancedRestCal) / 7);
+
+  document.getElementById('today-type').textContent = isNight ? 'Night shift day' : `Rest day · weekly avg ${weeklyAvg.toLocaleString()} cal`;
+  document.getElementById('today-cals').innerHTML = `${todayCal.toLocaleString()} <span>cal</span>`;
+  document.getElementById('tm-protein').textContent = (window.SHIFT_P_CALC || SHIFT_P) + 'g';
+  document.getElementById('tm-carbs').textContent = (isNight ? (window.SHIFT_C_CALC || SHIFT_C) : (window.REST_C_CALC || Math.round((todayCal - (window.SHIFT_P_CALC||SHIFT_P)*4 - Math.round(todayCal*0.28/9)*9)/4))) + 'g';
+  document.getElementById('tm-fat').textContent = (isNight ? (window.SHIFT_F_CALC || SHIFT_F) : (window.REST_F_CALC || Math.round(todayCal * 0.28 / 9))) + 'g';
+  buildMealTiming(isNight);
+  buildCaffeine(isNight);
+
+  const y = today.getFullYear(), m = today.getMonth();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  let monthNights = 0;
+  for (let d = 1; d <= daysInMonth; d++) { if (ogShifts[ogKey(y, m, d)]) monthNights++; }
+  const monthOff = daysInMonth - monthNights;
+  const typicalWeekNights = Math.round(monthNights / 4.3);
+  const typicalWeekOff = 7 - typicalWeekNights;
+  let monthRestCal = OFF_CAL;
+  if (typicalWeekOff > 0) {
+    monthRestCal = Math.max(1300, Math.round((OFF_CAL * 7 - typicalWeekNights * SHIFT_CAL) / typicalWeekOff));
+  }
+  const avg = Math.round((monthNights * SHIFT_CAL + monthOff * monthRestCal) / daysInMonth);
+  document.getElementById('og-cs-shifts').textContent = monthNights;
+  document.getElementById('og-cs-off').textContent = monthOff;
+  document.getElementById('og-cs-avg').textContent = profileCalculated ? avg.toLocaleString() : '—';
+}
+
+function ogChangeMonth(dir) {
+  ogCurrent.setMonth(ogCurrent.getMonth() + dir);
+  buildOGCalendar();
+}
+
+// ── MEAL TIMING ──────────────────────────────────────────
+function buildMealTiming(isNight) {
+  const meals = isNight ? [
+    {
+      time: '5:30 PM',
+      name: 'Pre-shift meal',
+      desc: 'Your biggest meal of the day.',
+      why:  'Cortisol is naturally lower before your shift and insulin sensitivity is at its highest. Your body processes carbs most efficiently here — front load them now rather than fighting your biology at 3am.',
+      cal:  '~35% of calories'
+    },
+    {
+      time: '11:00 PM',
+      name: 'Mid-shift snack',
+      desc: 'Light and balanced.',
+      why:  'Insulin sensitivity is dropping as the night progresses. Keep this meal moderate — enough to maintain energy and prevent cravings without a large blood sugar spike when your body is least equipped to handle it.',
+      cal:  '~20% of calories'
+    },
+    {
+      time: '3:00 AM',
+      name: 'Late snack',
+      desc: 'Protein only.',
+      why:  'Ghrelin is spiking and cortisol is elevated — this is the hardest moment of any night shift. Protein suppresses ghrelin more powerfully than carbs or fat. Avoid heavy carbs here — insulin sensitivity is at its lowest point of the entire 24 hour cycle.',
+      cal:  '~15% of calories'
+    },
+    {
+      time: '8:00 AM',
+      name: 'Post-shift recovery',
+      desc: 'Protein + carbs before you sleep.',
+      why:  'Carbohydrates increase tryptophan availability which directly supports melatonin production — helping you fall asleep faster and sleep deeper. Protein supports overnight muscle repair during sleep. This meal bridges your shift to your recovery sleep.',
+      cal:  '~30% of calories'
+    },
+  ] : [
+    { time: 'Morning',   name: 'Breakfast',         desc: 'High protein to start your day.',            why: 'Cortisol is naturally rising as you wake. A high protein breakfast stabilizes blood sugar and sets your hunger hormones up for a controlled rest day.', cal: '~30% of calories' },
+    { time: 'Midday',    name: 'Lunch',              desc: 'Balanced — protein, carbs, fat.',           why: 'Insulin sensitivity is good during the middle of your waking hours. This is a great window for a full balanced meal.', cal: '~30% of calories' },
+    { time: 'Afternoon', name: 'Snack (optional)',   desc: 'Protein snack if genuinely hungry.',        why: 'Only eat this if you are actually hungry — not out of boredom. A protein snack here keeps you from overeating at dinner.', cal: '~10% of calories' },
+    { time: 'Evening',   name: 'Dinner',             desc: 'Protein + vegetables. Wind down calories.', why: 'End your day lighter. Your metabolism naturally slows in the evening. Front loading calories earlier in the day is more effective for fat loss.', cal: '~30% of calories' },
+  ];
+
+  document.getElementById('meal-timing-body').innerHTML = meals.map(m => `
+    <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+        <div style="font-size:11px;font-weight:700;color:var(--green);min-width:62px">${m.time}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${m.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px">${m.desc}</div>
+        </div>
+        <div style="font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap">${m.cal}</div>
+      </div>
+      <div style="margin-left:70px;margin-top:6px;padding:8px 10px;background:var(--green-light);border-radius:8px;font-size:11px;color:var(--green-dark);line-height:1.5;border-left:2px solid var(--green)">
+        <span style="font-weight:600">Why: </span>${m.why}
+      </div>
+    </div>
+  `).join('') + `<div style="height:4px"></div>`;
+}
+
+// ── CAFFEINE ─────────────────────────────────────────────
+function buildCaffeine(isNight) {
+  const items = isNight ? [
+    { time: '5:00 PM',  title: 'First caffeine',   desc: 'Before your shift. Full dose.',           bg: 'var(--green-light)',  tc: 'var(--green)' },
+    { time: '11:00 PM', title: 'Second (optional)', desc: 'Half dose max. Only if you need it.', bg: 'var(--green-light)',  tc: 'var(--green)' },
+    { time: '2:00 AM',  title: 'Hard cut-off',    desc: 'No caffeine after this. It will still be in your system at sleep time.', bg: 'var(--amber-light)', tc: 'var(--amber)' },
+    { time: 'After 2AM','title': 'Switch to water', desc: 'Electrolytes or herbal tea. Protect your post-shift sleep.', bg: 'var(--red-light)',   tc: 'var(--red)' },
+  ] : [
+    { time: 'Morning',  title: 'First caffeine',    desc: 'Wait 90 min after waking. Let natural cortisol peak first.', bg: 'var(--green-light)', tc: 'var(--green)' },
+    { time: 'Early PM', title: 'Second (optional)', desc: 'Before 2pm on rest days. Any later and it tanks your night sleep.', bg: 'var(--amber-light)', tc: 'var(--amber)' },
+    { time: 'After 2PM','title': 'Cut-off point', desc: 'No caffeine on rest days after 2pm. Protect your sleep.', bg: 'var(--red-light)',  tc: 'var(--red)' },
+  ];
+  document.getElementById('caff-timeline').innerHTML = items.map(i => `
+    <div class="caff-row" style="background:${i.bg}">
+      <div class="caff-time" style="color:${i.tc}">${i.time}</div>
+      <div class="caff-info">
+        <div class="caff-title">${i.title}</div>
+        <div class="caff-desc">${i.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleProgressPhoto(input, type) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(`${type}-photo-img`);
+    const placeholder = document.getElementById(`${type}-photo-placeholder`);
+    img.src = e.target.result;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ── NOTES ────────────────────────────────────────────────
+let notesData = JSON.parse(localStorage.getItem('luca-notes') || '[]');
+
+function saveNotesData() {
+  try { localStorage.setItem('luca-notes', JSON.stringify(notesData)); } catch(e) {}
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function renderNotes() {
+  const thread = document.getElementById('notes-thread');
+  const empty  = document.getElementById('notes-empty');
+  if (!notesData.length) {
+    thread.style.display = 'none';
+    empty.style.display  = 'block';
+    return;
+  }
+  thread.style.display = 'flex';
+  empty.style.display  = 'none';
+
+  const name = document.getElementById('p-name') ? document.getElementById('p-name').value.trim() : '';
+  const initial = name ? name[0].toUpperCase() : 'Y';
+
+  thread.innerHTML = notesData.slice().reverse().map((note, i) => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">${initial}</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${name || 'You'}</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3)">${formatDate(note.ts)}</div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${note.text}</div>
+    </div>
+  `).join('');
+}
+
+function submitNote() {
+  const input = document.getElementById('new-note-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  notesData.push({ text, ts: Date.now() });
+  saveNotesData();
+  input.value = '';
+  document.getElementById('new-note-count').textContent = '0 characters';
+
+  // Show confirmation
+  const conf = document.getElementById('note-sent-confirm');
+  conf.style.display = 'block';
+  setTimeout(() => conf.style.display = 'none', 3000);
+
+  renderNotes();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Notes character counter
+  const noteInput = document.getElementById('new-note-input');
+  if (noteInput) {
+    noteInput.addEventListener('input', () => {
+      document.getElementById('new-note-count').textContent = noteInput.value.length + ' characters';
+    });
+  }
+  // Check-in notes counter
+  const ta = document.getElementById('checkin-notes');
+  if (ta) {
+    ta.addEventListener('input', () => {
+      const el = document.getElementById('notes-char-count');
+      if (el) el.textContent = ta.value.length + ' characters';
+    });
+  }
+  renderNotes();
+});
+
+// ── CHECK-IN HELPERS ──────────────────────────────────────
+function handleCheckinPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('checkin-photo-img').src = e.target.result;
+    document.getElementById('checkin-photo-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ── CHECK-IN ─────────────────────────────────────────────
+const questions = [
+  { q: 'How did you sleep?',                    opts: ['Great', 'Okay', 'Terrible'] },
+  { q: 'Energy levels today?',                  opts: ['High', 'Moderate', 'Low'] },
+  { q: 'Did you hit your calories yesterday?',  opts: ['Yes', 'Close', 'No'] },
+  { q: 'Did you hit your protein yesterday?',   opts: ['Yes', 'Close', 'No'] },
+  { q: 'How are you feeling mentally?',         opts: ['Good', 'Okay', 'Struggling'] },
+  { q: 'Did you work out this week?',           opts: ['Yes', 'Partially', 'No'] },
+  { q: 'How are your hunger/cravings?',         opts: ['Managed', 'Moderate', 'Bad'] },
+];
+
+const ciAnswers = {};
+
+function buildCheckin() {
+  document.getElementById('ci-questions').innerHTML = questions.map((q, qi) => `
+    <div class="ci-question">
+      <div class="ci-q-text">${q.q}</div>
+      <div class="ci-options">
+        ${q.opts.map((opt, oi) => `
+          <div class="ci-opt" id="ci-${qi}-${oi}" onclick="selectOpt(${qi},${oi},'${['green','amber','red'][oi]}')">${opt}</div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('') + `<button class="btn-log" style="width:100%;margin-top:12px" onclick="submitCheckin()">Submit check-in</button>`;
+}
+
+function selectOpt(qi, oi, color) {
+  ['green','amber','red'].forEach((c,i) => {
+    const el = document.getElementById(`ci-${qi}-${i}`);
+    if (el) { el.className = 'ci-opt'; }
+  });
+  document.getElementById(`ci-${qi}-${oi}`).className = `ci-opt selected-${color}`;
+  ciAnswers[qi] = oi;
+}
+
+function submitCheckin() {
+  const answered = Object.keys(ciAnswers).length;
+  if (answered < questions.length) { alert(`Please answer all ${questions.length} questions`); return; }
+  const greens = Object.values(ciAnswers).filter(v => v === 0).length;
+  const score = Math.round((greens / questions.length) * 100);
+  let icon, label, sub, luca, bg;
+  if (score >= 70) {
+    icon='🟢'; label='Green day — you\'re locked in'; bg='var(--green-light)';
+    sub='Your body and mind are aligned today. Consistency like this is what moves the scale.';
+    luca='This is exactly what the program is supposed to feel like. Keep showing up like this.';
+  } else if (score >= 40) {
+    icon='🟡'; label='Yellow day — getting there'; bg='var(--amber-light)';
+    sub='Some things are working, some need attention. Identify the one thing dragging your score and focus there.';
+    luca='Yellow days are part of working nights. Pick the one thing that\'s off and fix it today.';
+  } else {
+    icon='🔴'; label='Red day — rough one'; bg='var(--red-light)';
+    sub='Your body is telling you something. Don\'t spiral — drink water, hit your protein, sleep.';
+    luca='Red days happen on nights. One bad day doesn\'t erase your progress. Reset and go.';
+  }
+  document.getElementById('ci-result-box').style.background = bg;
+  document.getElementById('ci-icon').textContent = icon;
+  document.getElementById('ci-label').textContent = label;
+  document.getElementById('ci-sub').textContent = sub;
+  document.getElementById('ci-luca-txt').textContent = luca;
+  document.getElementById('ci-result-wrap').style.display = 'block';
+  document.getElementById('ci-questions').style.display = 'none';
+  document.getElementById('ci-result-wrap').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetCheckin() {
+  Object.keys(ciAnswers).forEach(k => delete ciAnswers[k]);
+  document.getElementById('ci-result-wrap').style.display = 'none';
+  document.getElementById('ci-questions').style.display = 'block';
+  buildCheckin();
+}
+
+// ── WEIGHT CHART ─────────────────────────────────────────
+// Empty on startup — Firestore data replaces this on login.
+const weightData = [];
+
+function updateWeightStats() {
+  if (!weightData.length) {
+    document.getElementById('ws-current').textContent = '—';
+    document.getElementById('ws-start').textContent   = '—';
+    document.getElementById('ws-change').textContent  = '';
+    document.getElementById('ws-entries').textContent = '0';
+    return;
+  }
+  const first  = weightData[0];
+  const latest = weightData[weightData.length - 1];
+  const diff   = (first - latest);          // positive = lost, negative = gained
+  const arrow  = diff >= 0 ? '↓' : '↑';
+  const cls    = diff >= 0 ? 'pos' : 'neg';
+  const change = document.getElementById('ws-change');
+  document.getElementById('ws-current').textContent = latest.toFixed(1);
+  document.getElementById('ws-start').textContent   = first.toFixed(1);
+  change.textContent  = `${arrow} ${Math.abs(diff).toFixed(1)} lbs`;
+  change.className    = `ws-change ${cls}`;
+  document.getElementById('ws-entries').textContent = weightData.length;
+}
+
+function buildChart() {
+  const today = new Date();
+  const m = today.getMonth() + 1;
+  document.getElementById('date-input').value =
+    `${today.getFullYear()}-${String(m).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  if (weightData.length < 2) {
+    // Not enough points to draw a line; clear paths.
+    document.getElementById('chart-line').setAttribute('d', '');
+    document.getElementById('chart-area').setAttribute('d', '');
+    return;
+  }
+
+  const min = Math.min(...weightData) - 1;
+  const max = Math.max(...weightData) + 1;
+  const W = 300, H = 100;
+  const pts = weightData.map((w, i) => [
+    (i / (weightData.length - 1)) * W,
+    H - ((w - min) / (max - min)) * H
+  ]);
+  const line = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ');
+  document.getElementById('chart-line').setAttribute('d', line);
+  document.getElementById('chart-area').setAttribute('d',
+    line + ` L${pts[pts.length-1][0]},${H} L0,${H} Z`);
+}
+
+function logWeight() {
+  const val = parseFloat(document.getElementById('weight-input').value);
+  if (isNaN(val) || val < 50 || val > 500) { alert('Please enter a valid weight'); return; }
+  weightData.push(val);
+  updateWeightStats();
+  buildChart();
+  document.getElementById('weight-input').value = '';
+}
+
+// ── PERSONAL / MACRO CALCULATOR ──────────────────────────
+let selectedSex = null, selectedActivity = 1.375, selectedPace = -200, selectedMacroPref = 'balanced';
+
+function selectMacroPref(pref) {
+  selectedMacroPref = pref;
+  ['balanced','highcarb','highfat'].forEach(x => {
+    document.getElementById(`macro-${x}`).className = 'ci-opt' + (x === pref ? ' selected-green' : '');
+  });
+}
+
+function updateInitials() {
+  const name = document.getElementById('p-name').value.trim();
+  const img = document.getElementById('profile-img');
+  if (img.style.display === 'none') {
+    document.getElementById('profile-initials').textContent = name ? name[0].toUpperCase() : '?';
+  }
+}
+
+function handlePhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('profile-img');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('profile-initials').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function selectSex(s) {
+  selectedSex = s;
+  ['male','female'].forEach(x => {
+    const el = document.getElementById(`sex-${x === 'male' ? 'm' : 'f'}`);
+    el.className = 'ci-opt' + (x === s ? ' selected-green' : '');
+  });
+}
+
+function selectPace(id, deficit) {
+  selectedPace = deficit;
+  ['slow','mod','fast'].forEach(x => {
+    document.getElementById(`pace-${x}`).className = 'ci-opt' + (x === id ? ' selected-green' : '');
+  });
+}
+
+function selectActivity(id, val) {
+  selectedActivity = val;
+  ['sed','light','mod','very'].forEach(x => {
+    document.getElementById(`act-${x}`).className = 'ci-opt' + (x === id ? ' selected-green' : '');
+  });
+}
+
+function calculateMacros() {
+  const name   = document.getElementById('p-name').value.trim() || 'there';
+  const age    = parseFloat(document.getElementById('p-age').value);
+  const height = parseFloat(document.getElementById('p-height').value);
+  const weight = parseFloat(document.getElementById('p-weight').value);
+
+  if (!selectedSex || isNaN(age) || isNaN(height) || isNaN(weight)) {
+    alert('Please fill in all fields and select your sex, activity level, and weight loss pace.');
+    return;
+  }
+
+  const weightKg = weight * 0.453592;
+  const heightCm = height * 2.54;
+
+  let bmr;
+  if (selectedSex === 'male') {
+    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+  } else {
+    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+  }
+
+  const tdee = Math.round(bmr * selectedActivity);
+  bmr = Math.round(bmr);
+
+  let deficitLabel;
+  if (selectedPace === -200)      deficitLabel = '−200 cal/day (≈0.4 lbs/week — slow start)';
+  else if (selectedPace === -350) deficitLabel = '−350 cal/day (≈0.7 lbs/week — moderate)';
+  else                            deficitLabel = '−500 cal/day (≈1 lb/week — aggressive)';
+
+  const baseCals  = tdee + selectedPace;
+  const shiftCals = baseCals + 150;
+  const restCals  = baseCals;
+
+  // Update global calorie variables so schedule tab stays in sync
+  SHIFT_CAL = shiftCals;
+  OFF_CAL   = restCals;
+  profileCalculated = true;
+
+  const protein     = Math.round(weight);
+  const proteinCals = protein * 4;
+
+  // Store macro split globally for schedule tab
+  window.SHIFT_P_CALC = protein;
+
+  // Fat % based on macro preference
+  let fatPct;
+  if (selectedMacroPref === 'highcarb') fatPct = 0.20;
+  else if (selectedMacroPref === 'highfat') fatPct = 0.38;
+  else fatPct = 0.28;
+
+  const shiftFat    = Math.round((shiftCals * fatPct) / 9);
+  const restFat     = Math.round((restCals  * fatPct) / 9);
+  const shiftCarbs  = Math.round((shiftCals - proteinCals - (shiftFat * 9)) / 4);
+  const restCarbs   = Math.round((restCals  - proteinCals - (restFat  * 9)) / 4);
+  const prefLabel   = selectedMacroPref === 'highcarb' ? 'Higher carbs (20% fat)' : selectedMacroPref === 'highfat' ? 'Higher fat (38% fat)' : 'Balanced (28% fat)';
+
+  // Store all macros globally so schedule tab stays in sync
+  window.SHIFT_C_CALC = shiftCarbs;
+  window.SHIFT_F_CALC = shiftFat;
+  window.REST_C_CALC  = restCarbs;
+  window.REST_F_CALC  = restFat;
+
+  document.getElementById('res-name').textContent = `Hey ${name}!`;
+  document.getElementById('res-shift-cals').innerHTML = `${shiftCals.toLocaleString()} <span>cal on shift days</span>`;
+  document.getElementById('res-protein').textContent = protein + 'g';
+  document.getElementById('res-carbs').textContent   = shiftCarbs + 'g';
+  document.getElementById('res-fat').textContent     = shiftFat + 'g';
+  document.getElementById('res-rest-cals').textContent    = restCals.toLocaleString() + ' cal';
+  document.getElementById('res-rest-protein').textContent = protein + 'g';
+  document.getElementById('res-rest-carbs').textContent   = restCarbs + 'g';
+  document.getElementById('res-rest-fat').textContent     = restFat + 'g';
+  document.getElementById('res-bmr').textContent     = bmr.toLocaleString() + ' cal';
+  document.getElementById('res-tdee').textContent    = tdee.toLocaleString() + ' cal';
+  document.getElementById('res-deficit').textContent = deficitLabel;
+  document.getElementById('res-macro-pref').textContent = prefLabel;
+  document.getElementById('res-luca-note').textContent = `These are your numbers ${name} — own them. We are starting with a small deficit because night shift already puts your body under stress. We build from here. Hit ${protein}g of protein every single day and everything else falls into place.`;
+
+  document.getElementById('today-cals').innerHTML = `${shiftCals} <span>cal</span>`;
+  document.getElementById('tm-protein').textContent = protein + 'g';
+  document.getElementById('tm-carbs').textContent   = shiftCarbs + 'g';
+  document.getElementById('tm-fat').textContent     = shiftFat + 'g';
+
+  document.getElementById('macro-results').style.display = 'block';
+  document.getElementById('macro-results').scrollIntoView({ behavior: 'smooth' });
+
+  // Rebuild calendar so schedule tab reflects updated calorie targets
+  buildOGCalendar();
+}
+
+// ── VIDEO HIDE TOGGLE ────────────────────────────────────
+function toggleVid(id) {
+  const thumb     = document.getElementById('vt-' + id);
+  const collapsed = document.getElementById('vc-' + id);
+  const isHidden  = thumb.style.display === 'none';
+
+  if (!isHidden) {
+    // Pause the Vimeo player before hiding via postMessage API
+    const iframe = thumb.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage('{"method":"pause"}', '*');
+    }
+  }
+
+  thumb.style.display     = isHidden ? 'flex' : 'none';
+  collapsed.style.display = isHidden ? 'none' : 'flex';
+}
+
+// ── VIDEO MODAL ──────────────────────────────────────────
+function openVideoModal(videoId) {
+  const modal = document.getElementById('video-modal');
+  const inner = document.getElementById('video-modal-inner');
+  inner.innerHTML = `<iframe
+    src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0"
+    style="position:absolute;inset:0;width:100%;height:100%;border:0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen></iframe>`;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideoModal() {
+  document.getElementById('video-modal').style.display = 'none';
+  document.getElementById('video-modal-inner').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+buildOGCalendar();
+buildMealTiming(false);
+buildCaffeine(false);
+buildCheckin();
+buildChart();
+</script>
+
+<!-- ── FIREBASE CONFIG & WIRING ── -->
+<script>
+// ─────────────────────────────────────────────────────────
+// PASTE YOUR FIREBASE PROJECT CONFIG HERE
+// Firebase Console → Project Settings → Your apps → Config
+// ─────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBXdJi-B71sVv5RIsc1jV5tNp8uPq-IJCk",
+  authDomain: "luca-app-995f4.firebaseapp.com",
+  projectId: "luca-app-995f4",
+  storageBucket: "luca-app-995f4.firebasestorage.app",
+  messagingSenderId: "8175326678",
+  appId: "1:8175326678:web:82451ecc01f9e3800cc077",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ── Firestore helpers ─────────────────────────────────────
+function userDoc()    { return db.collection('users').doc(auth.currentUser.uid); }
+function weightsCol() { return userDoc().collection('weights'); }
+function checkinsCol(){ return userDoc().collection('checkins'); }
+function notesCol()   { return userDoc().collection('notes'); }
+
+// ── AUTH ─────────────────────────────────────────────────
+
+function showAuthErr(msg) {
+  const el = document.getElementById('auth-err');
+  el.textContent   = msg;
+  el.style.display = 'block';
+}
+
+async function authSubmit() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  document.getElementById('auth-err').style.display    = 'none';
+  document.getElementById('auth-saving').style.display = 'block';
+  document.getElementById('auth-submit-btn').disabled  = true;
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch(e) {
+    showAuthErr(friendlyAuthError(e.code));
+  } finally {
+    document.getElementById('auth-saving').style.display = 'none';
+    document.getElementById('auth-submit-btn').disabled  = false;
+  }
+}
+
+function friendlyAuthError(code) {
+  const map = {
+    'auth/invalid-email':        'Invalid email address.',
+    'auth/user-not-found':       'No account found with that email.',
+    'auth/wrong-password':       'Incorrect password.',
+    'auth/email-already-in-use': 'An account with that email already exists.',
+    'auth/weak-password':        'Password must be at least 6 characters.',
+    'auth/too-many-requests':    'Too many attempts. Try again later.',
+    'auth/invalid-credential':   'Incorrect email or password.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+['auth-email','auth-password'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); });
+});
+
+// ── USER PROVISIONING ─────────────────────────────────────
+// Runs on every sign-in. Creates a Firestore document for the
+// user if one does not already exist. Never overwrites existing data.
+async function provisionUser(user) {
+  const ref = db.collection('users').doc(user.uid);
+  try {
+    const snap = await ref.get();
+    if (!snap.exists) {
+      await ref.set({
+        uid:                user.uid,
+        email:              user.email || '',
+        createdAt:          firebase.firestore.FieldValue.serverTimestamp(),
+        onboardingComplete: false,
+        role:               'client'
+      });
+      console.log('[Luca] User document created for:', user.email, '| uid:', user.uid);
+    } else {
+      console.log('[Luca] User document already exists for:', user.email, '| uid:', user.uid);
+    }
+  } catch (e) {
+    console.error('[Luca] Firestore error during user provisioning:', e);
+  }
+}
+
+// ── AUTH STATE ────────────────────────────────────────────
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    // Provision Firestore doc first — no-op if the document already exists.
+    await provisionUser(user);
+    // Profile MUST load first: it sets SHIFT_CAL / OFF_CAL / profileCalculated.
+    // Schedule and other data load after so the calendar builds with correct values.
+    await loadProfile();
+    await Promise.all([loadWeights(), loadSchedule(), loadNotes()]);
+    // Final rebuild ensures schedule tab reflects both profile macros and saved shifts.
+    buildOGCalendar();
+  } else {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+  }
+});
+
+// ── PROFILE — SAVE ────────────────────────────────────────
+async function saveProfile(data) {
+  await userDoc().set(data, { merge: true });
+}
+
+// ── PROFILE — LOAD ────────────────────────────────────────
+async function loadProfile() {
+  const snap = await userDoc().get();
+  if (!snap.exists) return;
+  const d = snap.data();
+
+  // Restore text / number fields
+  if (d.name)   { document.getElementById('p-name').value   = d.name;   updateInitials(); }
+  if (d.age)    document.getElementById('p-age').value    = d.age;
+  if (d.height) document.getElementById('p-height').value = d.height;
+  if (d.weight) document.getElementById('p-weight').value = d.weight;
+
+  // Restore selection buttons
+  if (d.sex) selectSex(d.sex);
+  if (d.activity !== undefined) {
+    const map = { 1.2:'sed', 1.375:'light', 1.55:'mod', 1.725:'very' };
+    selectActivity(map[d.activity] || 'light', d.activity);
+  }
+  if (d.pace !== undefined) {
+    const map = { '-200':'slow', '-350':'mod', '-500':'fast' };
+    selectPace(map[String(d.pace)] || 'slow', d.pace);
+  }
+  if (d.macroPref) selectMacroPref(d.macroPref);
+
+  // If the user already completed setup, run calculation silently and hide form
+  if (d.profileComplete) {
+    _runCalcSilent();   // populate results without scrolling
+    hideProfileForm();  // hide questions, show Edit button
+  }
+}
+
+// Run the original macro calculation without the auto-scroll
+function _runCalcSilent() {
+  // Temporarily disable scrollIntoView on the results div
+  const el = document.getElementById('macro-results');
+  const orig = el.scrollIntoView.bind(el);
+  el.scrollIntoView = () => {};          // no-op
+  calculateMacros();                     // original function
+  el.scrollIntoView = orig;             // restore
+}
+
+// ── PROFILE FORM VISIBILITY ───────────────────────────────
+function hideProfileForm() {
+  document.getElementById('profile-form-wrap').style.display = 'none';
+  document.getElementById('profile-edit-btn').style.display  = 'block';
+}
+
+function showProfileForm() {
+  document.getElementById('profile-form-wrap').style.display = 'block';
+  document.getElementById('profile-edit-btn').style.display  = 'none';
+  // Scroll so the user lands at the top of the form
+  document.getElementById('profile-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── WEIGHT — SAVE & LOAD ─────────────────────────────────
+async function saveWeight(lbs, dateStr) {
+  await weightsCol().add({
+    lbs,
+    date: dateStr,
+    ts:   firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+async function loadWeights() {
+  const snap = await weightsCol().orderBy('ts').get();
+  weightData.length = 0;
+  snap.forEach(doc => weightData.push(doc.data().lbs));
+  updateWeightStats();
+  buildChart();
+}
+
+// ── CHECK-IN — SAVE ──────────────────────────────────────
+async function saveCheckin(answers, score) {
+  const today = new Date();
+  const date  = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  await checkinsCol().add({
+    answers,
+    score,
+    date,
+    ts: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+// ── SCHEDULE — SAVE & LOAD ────────────────────────────────
+async function saveSchedule() {
+  // Only persist days explicitly marked as night shifts (true).
+  // Storing false values wastes space and causes stale keys on load.
+  const onlyShifts = {};
+  Object.entries(ogShifts).forEach(([k, v]) => { if (v) onlyShifts[k] = true; });
+  await userDoc().set({ schedule: onlyShifts }, { merge: true });
+}
+
+async function loadSchedule() {
+  const snap = await userDoc().get();
+  if (!snap.exists) return;
+  const d = snap.data();
+  if (d.schedule) {
+    // Replace in-memory shifts with exactly what's in the DB (all true values).
+    Object.keys(ogShifts).forEach(k => delete ogShifts[k]);
+    Object.assign(ogShifts, d.schedule);
+  }
+  // buildOGCalendar is called by the auth listener after this resolves,
+  // so no extra call needed here.
+}
+
+// ── NOTES — SAVE & LOAD ───────────────────────────────────
+async function saveNote(text) {
+  await notesCol().add({ text, ts: firebase.firestore.FieldValue.serverTimestamp() });
+}
+
+async function loadNotes() {
+  const snap = await notesCol().orderBy('ts').get();
+  if (snap.empty) return;
+  notesData.length = 0;
+  snap.forEach(doc => notesData.push({ text: doc.data().text, ts: doc.data().ts?.toMillis?.() || Date.now() }));
+  renderNotes();
+}
+
+// ── WIRE EXISTING FUNCTIONS TO FIREBASE ──────────────────
+
+// ── PROFILE RESULTS — TODAY'S DYNAMIC CARD ───────────────
+function updateProfileTodayCard() {
+  if (!profileCalculated) return;
+  const today = new Date();
+  const k = ogKey(today.getFullYear(), today.getMonth(), today.getDate());
+  const isNight = !!ogShifts[k];
+
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const { balancedRestCal } = getWeeklyBalancedCals(weekStart);
+
+  const todayCal   = isNight ? SHIFT_CAL : balancedRestCal;
+  const todayCarbs = isNight ? (window.SHIFT_C_CALC || 0) : (window.REST_C_CALC || 0);
+  const todayFat   = isNight ? (window.SHIFT_F_CALC || 0) : (window.REST_F_CALC || 0);
+  const dayLabel   = isNight ? 'cal · night shift day' : 'cal · rest day';
+
+  // Rebuild innerHTML so we never depend on a span that may have been overwritten
+  document.getElementById('res-shift-cals').innerHTML =
+    `${todayCal.toLocaleString()} <span>${dayLabel}</span>`;
+  document.getElementById('res-protein').textContent = (window.SHIFT_P_CALC || 0) + 'g';
+  document.getElementById('res-carbs').textContent   = todayCarbs + 'g';
+  document.getElementById('res-fat').textContent     = todayFat + 'g';
+}
+
+// logWeight → capture date before original clears the input, then persist
+const _origLogWeight = logWeight;
+window.logWeight = function() {
+  const val     = parseFloat(document.getElementById('weight-input').value);
+  const dateStr = document.getElementById('date-input').value;
+  _origLogWeight();   // validates, pushes to weightData, updates stats + chart
+  // Only save if validation passed (original returns early on bad input)
+  if (!isNaN(val) && val >= 50 && val <= 500 && auth.currentUser) {
+    saveWeight(val, dateStr).catch(console.error);
+  }
+};
+
+// ogToggleDay → persists schedule + refreshes profile card for today
+const _origOgToggleDay = ogToggleDay;
+window.ogToggleDay = function(k, y, m, d) {
+  _origOgToggleDay(k, y, m, d);
+  updateProfileTodayCard();
+  if (auth.currentUser) saveSchedule().catch(console.error);
+};
+
+// submitNote → also persists note to Firestore
+const _origSubmitNote = submitNote;
+window.submitNote = function() {
+  const text = document.getElementById('new-note-input').value.trim();
+  if (!text) return;
+  _origSubmitNote();
+  if (auth.currentUser) saveNote(text).catch(console.error);
+};
+
+// submitCheckin → let original handle validation + UI, then persist to Firestore
+const _origSubmitCheckin = submitCheckin;
+window.submitCheckin = function() {
+  // Run original — it validates, computes score, and updates the result UI.
+  // If validation fails it alerts and returns without showing results.
+  _origSubmitCheckin();
+
+  // Only save if the result panel became visible (validation passed).
+  if (!auth.currentUser) return;
+  if (document.getElementById('ci-result-wrap').style.display !== 'block') return;
+
+  const greens = Object.values(ciAnswers).filter(v => v === 0).length;
+  const score  = Math.round((greens / questions.length) * 100);
+  saveCheckin({ ...ciAnswers }, score).catch(console.error);
+};
+
+// calculateMacros → persists profile, then hides form on first save or after edit
+const _origCalcMacros = calculateMacros;
+window.calculateMacros = function() {
+  _origCalcMacros();     // runs validation, updates DOM, shows results, scrolls
+
+  if (!auth.currentUser) return;
+
+  const profileData = {
+    name:            document.getElementById('p-name').value.trim(),
+    age:             parseFloat(document.getElementById('p-age').value),
+    height:          parseFloat(document.getElementById('p-height').value),
+    weight:          parseFloat(document.getElementById('p-weight').value),
+    sex:             selectedSex,
+    activity:        selectedActivity,
+    pace:            selectedPace,
+    macroPref:       selectedMacroPref,
+    profileComplete: true,
+    updatedAt:       firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  // Only persist if validation passed — results div becomes visible on success
+  if (document.getElementById('macro-results').style.display === 'block') {
+    saveProfile(profileData)
+      .then(() => hideProfileForm())
+      .catch(console.error);
+  }
+};
+</script>
+</body>
+</html>
